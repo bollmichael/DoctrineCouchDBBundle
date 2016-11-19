@@ -21,7 +21,6 @@
     "suggest": {
     },
     "autoload": {
-        "psr-0": { "Doctrine\\Bundle\\CouchDBBundle": "" }
-    },
-    "target-dir": "Doctrine/Bundle/CouchDBBundle"
+        "psr-4": { "Doctrine\\Bundle\\CouchDBBundle\\": "" }
+    }
 }
