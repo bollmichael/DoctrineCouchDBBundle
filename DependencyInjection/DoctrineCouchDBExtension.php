@@ -41,6 +41,11 @@ class DoctrineCouchDBExtension extends AbstractDoctrineExtension
 
     private $bundleDirs = array();
 
+    /**
+     * @var string
+     */
+    private $defaultConnection;
+
     public function load(array $configs, ContainerBuilder $container)
     {
         $processor = new Processor();
@@ -110,7 +115,7 @@ class DoctrineCouchDBExtension extends AbstractDoctrineExtension
         }
     }
 
-    private function odmLoad($config, $container)
+    private function odmLoad($config, ContainerBuilder $container)
     {
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('odm.xml');
@@ -188,6 +193,12 @@ class DoctrineCouchDBExtension extends AbstractDoctrineExtension
     }
 
 
+    /**
+     * Loads an ODM document managers bundle mapping information.
+     * @param array            $documentManager A configured ODM document manager
+     * @param Definition       $odmConfig       A Definition instance
+     * @param ContainerBuilder $container       A ContainerBuilder instance
+     */
     protected function loadOdmDocumentManagerMappingInformation(array $documentManager, Definition $odmConfig, ContainerBuilder $container)
     {
         // reset state of drivers and alias map. They are only used by this methods and children.
@@ -309,6 +320,9 @@ class DoctrineCouchDBExtension extends AbstractDoctrineExtension
         return $cacheDef;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function getObjectManagerElementName($name)
     {
         return 'doctrine_couchdb.odm.'.$name;
@@ -319,11 +333,17 @@ class DoctrineCouchDBExtension extends AbstractDoctrineExtension
         return 'CouchDocument';
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function getMappingResourceConfigDirectory()
     {
         return 'Resources/config/doctrine';
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected function getMappingResourceExtension()
     {
         return 'couchdb';
