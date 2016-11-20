@@ -18,7 +18,7 @@
         <parameter key="doctrine_couchdb.odm.cache.memcache_port">11211</parameter>
         <parameter key="doctrine_couchdb.odm.cache.memcache_instance.class">Memcache</parameter>
         <parameter key="doctrine_couchdb.odm.cache.xcache.class">Doctrine\Common\Cache\XcacheCache</parameter>
-        <parameter key="doctrine_couchdb.odm.proxy_cache_warmer.class">Doctrine\Bundle\CouchDBBundle\CacheWarmer\ProxyCacheWarmer</parameter>
+        <parameter key="doctrine_couchdb.odm.proxy_cache_warmer.class">Symfony\Bridge\Doctrine\CacheWarmer\ProxyCacheWarmer</parameter>
 
         <!-- security -->
         <parameter key="doctrine_couchdb.odm.user_provider.class">Symfony\Bridge\Doctrine\Security\User\EntityUserProvider</parameter>
@@ -44,7 +44,7 @@
 
         <service id="doctrine_couchdb.odm.proxy_cache_warmer" class="%doctrine_couchdb.odm.proxy_cache_warmer.class%" public="false">
             <tag name="kernel.cache_warmer" />
-            <argument type="service" id="service_container" />
+            <argument type="service" id="doctrine_couchdb" />
         </service>
 
         <service
