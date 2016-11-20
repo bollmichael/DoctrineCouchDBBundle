@@ -14,8 +14,10 @@
 
 namespace Doctrine\Bundle\CouchDBBundle;
 
+use Doctrine\Common\Proxy\Autoloader;
+use Doctrine\Common\Util\ClassUtils;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
-use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Bridge\Doctrine\DependencyInjection\CompilerPass\DoctrineValidationPass;
@@ -25,10 +27,18 @@ use Symfony\Bridge\Doctrine\DependencyInjection\Security\UserProvider\EntityFact
 class DoctrineCouchDBBundle extends Bundle
 {
     /**
-     * @var Closure
+     * @var \Closure
      */
     private $autoloader;
 
+    /**
+     * @var ContainerInterface
+     */
+    protected $container;
+
+    /**
+     * {@inheritDoc}
+     */
     public function build(ContainerBuilder $container)
     {
         parent::build($container);
@@ -42,58 +52,78 @@ class DoctrineCouchDBBundle extends Bundle
         $container->addCompilerPass(new DoctrineValidationPass('couchdb'));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function boot()
     {
-        // force Doctrine annotations to be loaded
-        // should be removed when a better solution is found in Doctrine
-        class_exists('Doctrine\ODM\CouchDB\Mapping\Driver\AnnotationDriver');
-
         // Register an autoloader for proxies to avoid issues when unserializing them
         // when the ORM is used.
         if ($this->container->hasParameter('doctrine_couchdb.odm.proxy_namespace')) {
             $namespace = $this->container->getParameter('doctrine_couchdb.odm.proxy_namespace');
             $dir = $this->container->getParameter('doctrine_couchdb.odm.proxy_dir');
-            $container = $this->container;
+            $proxyGenerator = null;
 
-            $this->autoloader = function($class) use ($namespace, $dir, $container) {
-                if (0 === strpos($class, $namespace)) {
-                    $className = substr($class, strlen($namespace) +1);
-                    $file = $dir.DIRECTORY_SEPARATOR . str_replace('\\', '', $className) . '.php';
+            if ($this->container->getParameter('doctrine_couchdb.odm.auto_generate_proxy_classes')) {
+                // See https://github.com/symfony/symfony/pull/3419 for usage of references
+                $container = &$this->container;
 
-                    if (!is_file($file) && $container->getParameter('doctrine_couchdb.odm.auto_generate_proxy_classes')) {
-                        $originalClassName = substr($className, 7);
-                        $registry = $container->get('doctrine_couchdb');
+                $proxyGenerator = function ($proxyDir, $proxyNamespace, $class) use (&$container) {
+                    $originalClassName = ClassUtils::getRealClass($class);
+                    /** @var $registry ManagerRegistry */
+                    $registry = $container->get('doctrine_couchdb');
 
-                        // Tries to auto-generate the proxy file
-                        foreach ($registry->getManagers() as $manager) {
-
-                            if ($manager->getConfiguration()->getAutoGenerateProxyClasses()) {
-                                $classes = $manager->getMetadataFactory()->getAllMetadata();
-
-                                foreach ($classes as $class) {
-                                    if ($class->name == $originalClassName) {
-                                        $manager->getProxyFactory()->generateProxyClasses(array($class));
-                                    }
-                                }
-                            }
+                    // Tries to auto-generate the proxy file
+                    /** @var $em \Doctrine\ORM\EntityManager */
+                    foreach ($registry->getManagers() as $em) {
+                        if (!$em->getConfiguration()->getAutoGenerateProxyClasses()) {
+                            continue;
                         }
 
-                        clearstatcache($file);
+                        $metadataFactory = $em->getMetadataFactory();
 
-                        if (!is_file($file)) {
-                            throw new \RuntimeException(sprintf('The proxy file "%s" does not exist. If you still have objects serialized in the session, you need to clear the session manually.', $file));
+                        if ($metadataFactory->isTransient($originalClassName)) {
+                            continue;
                         }
+
+                        $classMetadata = $metadataFactory->getMetadataFor($originalClassName);
+
+                        $em->getProxyFactory()->generateProxyClasses(array($classMetadata));
+
+                        clearstatcache(true, Autoloader::resolveFile($proxyDir, $proxyNamespace, $class));
+
+                        break;
                     }
+                };
+            }
 
-                    require $file;
-                }
-            };
-            spl_autoload_register($this->autoloader);
+            $this->autoloader = Autoloader::register($dir, $namespace, $proxyGenerator);
         }
     }
 
     public function shutdown()
     {
-        spl_autoload_unregister($this->autoloader);
+        if (null !== $this->autoloader) {
+            spl_autoload_unregister($this->autoloader);
+            $this->autoloader = null;
+        }
+
+        // Clear all entity managers to clear references to entities for GC
+        if ($this->container->hasParameter('doctrine_couchdb.document_managers')) {
+            foreach ($this->container->getParameter('doctrine_couchdb.document_managers') as $id) {
+                if ($this->container->initialized($id)) {
+                    $this->container->get($id)->clear();
+                }
+            }
+        }
+
+        // Close all connections to avoid reaching too many connections in the process when booting again later (tests)
+        if ($this->container->hasParameter('doctrine_couchdb.connections')) {
+            foreach ($this->container->getParameter('doctrine_couchdb.connections') as $id) {
+                if ($this->container->initialized($id)) {
+                    $this->container->get($id)->close();
+                }
+            }
+        }
     }
 }
