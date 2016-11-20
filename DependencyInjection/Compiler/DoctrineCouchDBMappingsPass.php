@@ -107,9 +107,8 @@ class DoctrineCouchDBMappingsPass extends RegisterMappingsPass
      */
     public static function createAnnotationMappingDriver(array $namespaces, array $directories, array $managerParameters, $enabledParameter = false, array $aliasMap = array())
     {
-        $arguments = array(new Reference('doctrine_couchdb.odm.metadata.annotation_reader'), $directories);
-        $locator = new Definition('Doctrine\Common\Persistence\Mapping\Driver\SymfonyFileLocator', $arguments);
-        $driver = new Definition('Doctrine\ODM\CouchDB\Mapping\Driver\AnnotationDriver', array($locator));
+        $reader = new Reference('annotation_reader');
+        $driver = new Definition('Doctrine\ODM\CouchDB\Mapping\Driver\AnnotationDriver', array($reader, $directories));
 
         return new DoctrineCouchDBMappingsPass($driver, $namespaces, $managerParameters, $enabledParameter, $aliasMap);
     }
