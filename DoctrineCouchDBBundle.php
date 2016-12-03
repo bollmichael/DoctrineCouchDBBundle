@@ -16,6 +16,8 @@ namespace Doctrine\Bundle\CouchDBBundle;
 
 use Doctrine\Common\Proxy\Autoloader;
 use Doctrine\Common\Util\ClassUtils;
+use Doctrine\ODM\CouchDB\DocumentManager;
+use Symfony\Bundle\SecurityBundle\DependencyInjection\SecurityExtension;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -45,7 +47,9 @@ class DoctrineCouchDBBundle extends Bundle
         $container->addCompilerPass(new RegisterEventListenersAndSubscribersPass('doctrine_couchdb.connections', 'doctrine_couchdb.odm.%s_connection.event_manager', 'doctrine'));
 
         if ($container->hasExtension('security')) {
-            $container->getExtension('security')->addUserProviderFactory(new EntityFactory('couchdb', 'doctrine_couchdb.odm.security.user.provider'));
+            /** @var SecurityExtension $extension */
+            $extension = $container->getExtension('security');
+            $extension->addUserProviderFactory(new EntityFactory('couchdb', 'doctrine_couchdb.odm.security.user.provider'));
         }
 
         $container->addCompilerPass(new DoctrineValidationPass('couchdb'));
