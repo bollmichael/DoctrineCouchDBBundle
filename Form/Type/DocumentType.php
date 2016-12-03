@@ -17,7 +17,6 @@ namespace Doctrine\Bundle\CouchDBBundle\Form\Type;
 use Doctrine\Bundle\CouchDBBundle\Form\ChoiceList\CouchDBEntityLoader;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Bridge\Doctrine\Form\Type\DoctrineType;
-use Symfony\Component\Form\Exception\FormException;
 use Symfony\Bridge\Doctrine\Form\ChoiceList\EntityLoaderInterface;
 
 class DocumentType extends DoctrineType
@@ -30,8 +29,6 @@ class DocumentType extends DoctrineType
      * @param string        $class
      *
      * @return EntityLoaderInterface
-     *
-     * @throws FormException
      */
     public function getLoader(ObjectManager $manager, $queryBuilder, $class)
     {
