@@ -18,7 +18,6 @@ use Doctrine\Common\Proxy\Autoloader;
 use Doctrine\Common\Util\ClassUtils;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
-use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Bridge\Doctrine\DependencyInjection\CompilerPass\DoctrineValidationPass;
 use Symfony\Bridge\Doctrine\DependencyInjection\CompilerPass\RegisterEventListenersAndSubscribersPass;
@@ -43,7 +42,7 @@ class DoctrineCouchDBBundle extends Bundle
     {
         parent::build($container);
 
-        $container->addCompilerPass(new RegisterEventListenersAndSubscribersPass('doctrine_couchdb.connections', 'doctrine_couchdb.odm.%s_connection.event_manager', 'doctrine'), PassConfig::TYPE_BEFORE_OPTIMIZATION);
+        $container->addCompilerPass(new RegisterEventListenersAndSubscribersPass('doctrine_couchdb.connections', 'doctrine_couchdb.odm.%s_connection.event_manager', 'doctrine'));
 
         if ($container->hasExtension('security')) {
             $container->getExtension('security')->addUserProviderFactory(new EntityFactory('couchdb', 'doctrine_couchdb.odm.security.user.provider'));
