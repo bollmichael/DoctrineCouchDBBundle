@@ -75,7 +75,7 @@ class DoctrineCouchDBMappingsPass extends RegisterMappingsPass
         $locator = new Definition('Doctrine\Common\Persistence\Mapping\Driver\SymfonyFileLocator', $arguments);
         $driver = new Definition('Doctrine\ODM\CouchDB\Mapping\Driver\XmlDriver', array($locator));
 
-        return new DoctrineCouchDBMappingsPass($driver, $namespaces, $managerParameters, $enabledParameter, $aliasMap);
+        return new static($driver, $namespaces, $managerParameters, $enabledParameter, $aliasMap);
     }
 
     /**
@@ -97,7 +97,7 @@ class DoctrineCouchDBMappingsPass extends RegisterMappingsPass
         $locator = new Definition('Doctrine\Common\Persistence\Mapping\Driver\SymfonyFileLocator', $arguments);
         $driver = new Definition('Doctrine\ODM\CouchDB\Mapping\Driver\YamlDriver', array($locator));
 
-        return new DoctrineCouchDBMappingsPass($driver, $namespaces, $managerParameters, $enabledParameter, $aliasMap);
+        return new static($driver, $namespaces, $managerParameters, $enabledParameter, $aliasMap);
     }
 
     /**
@@ -119,7 +119,7 @@ class DoctrineCouchDBMappingsPass extends RegisterMappingsPass
         $reader = new Reference('annotation_reader');
         $driver = new Definition('Doctrine\ODM\CouchDB\Mapping\Driver\AnnotationDriver', array($reader, $directories));
 
-        return new DoctrineCouchDBMappingsPass($driver, $namespaces, $managerParameters, $enabledParameter, $aliasMap);
+        return new static($driver, $namespaces, $managerParameters, $enabledParameter, $aliasMap);
     }
 
     /**
@@ -141,7 +141,7 @@ class DoctrineCouchDBMappingsPass extends RegisterMappingsPass
         $locator = new Definition('Doctrine\Common\Persistence\Mapping\Driver\SymfonyFileLocator', $arguments);
         $driver = new Definition('Doctrine\Common\Persistence\Mapping\Driver\PHPDriver', array($locator));
 
-        return new DoctrineCouchDBMappingsPass($driver, $namespaces, $managerParameters, $enabledParameter, $aliasMap);
+        return new static($driver, $namespaces, $managerParameters, $enabledParameter, $aliasMap);
     }
 
     /**
@@ -162,6 +162,6 @@ class DoctrineCouchDBMappingsPass extends RegisterMappingsPass
     {
         $driver = new Definition('Doctrine\Common\Persistence\Mapping\Driver\StaticPHPDriver', array($directories));
 
-        return new DoctrineCouchDBMappingsPass($driver, $namespaces, $managerParameters, $enabledParameter, $aliasMap);
+        return new static($driver, $namespaces, $managerParameters, $enabledParameter, $aliasMap);
     }
 }
