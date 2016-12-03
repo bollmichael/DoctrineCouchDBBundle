@@ -28,13 +28,13 @@ class BundleTest extends TestCase
     public function testRegisterCompilerPasses()
     {
         $bundle = new DoctrineCouchDBBundle();
-        $builder = $this->getMock('Symfony\Component\DependencyInjection\ContainerBuilder', array('hasExtension', 'addCompilerPass'));
-        $builder->expects($this->at(0))->method('hasExtension')->will($this->returnValue(false));
+        $builder = $this->getMockBuilder('Symfony\Component\DependencyInjection\ContainerBuilder')->setMethods(array('hasExtension', 'addCompilerPass'))->getMock();
+        $builder->expects($this->at(1))->method('hasExtension')->will($this->returnValue(false));
 
-        $builder->expects($this->at(1))
+        $builder->expects($this->at(0))
                 ->method('addCompilerPass')
                 ->with(
-                    $this->isInstanceOf('Doctrine\Bundle\CouchDBBundle\DependencyInjection\Compiler\RegisterEventListenersAndSubscribersPass'),
+                    $this->isInstanceOf('Symfony\Bridge\Doctrine\DependencyInjection\CompilerPass\RegisterEventListenersAndSubscribersPass'),
                     $this->equalTo(PassConfig::TYPE_BEFORE_OPTIMIZATION)
                 );
         $builder->expects($this->at(2))
