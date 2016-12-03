@@ -77,13 +77,13 @@ class DoctrineCouchDBBundle extends Bundle
                     $registry = $container->get('doctrine_couchdb');
 
                     // Tries to auto-generate the proxy file
-                    /** @var $em \Doctrine\ORM\EntityManager */
-                    foreach ($registry->getManagers() as $em) {
-                        if (!$em->getConfiguration()->getAutoGenerateProxyClasses()) {
+                    /** @var $dm DocumentManager */
+                    foreach ($registry->getManagers() as $dm) {
+                        if (!$dm->getConfiguration()->getAutoGenerateProxyClasses()) {
                             continue;
                         }
 
-                        $metadataFactory = $em->getMetadataFactory();
+                        $metadataFactory = $dm->getMetadataFactory();
 
                         if ($metadataFactory->isTransient($originalClassName)) {
                             continue;
@@ -91,7 +91,7 @@ class DoctrineCouchDBBundle extends Bundle
 
                         $classMetadata = $metadataFactory->getMetadataFor($originalClassName);
 
-                        $em->getProxyFactory()->generateProxyClasses(array($classMetadata));
+                        $dm->getProxyFactory()->generateProxyClasses(array($classMetadata));
 
                         clearstatcache(true, Autoloader::resolveFile($proxyDir, $proxyNamespace, $class));
 
