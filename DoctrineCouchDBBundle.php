@@ -119,14 +119,5 @@ class DoctrineCouchDBBundle extends Bundle
                 }
             }
         }
-
-        // Close all connections to avoid reaching too many connections in the process when booting again later (tests)
-        if ($this->container->hasParameter('doctrine_couchdb.connections')) {
-            foreach ($this->container->getParameter('doctrine_couchdb.connections') as $id) {
-                if ($this->container->initialized($id)) {
-                    $this->container->get($id)->close();
-                }
-            }
-        }
     }
 }
