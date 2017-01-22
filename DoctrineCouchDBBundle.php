@@ -44,7 +44,7 @@ class DoctrineCouchDBBundle extends Bundle
     {
         parent::build($container);
 
-        $container->addCompilerPass(new RegisterEventListenersAndSubscribersPass('doctrine_couchdb.connections', 'doctrine_couchdb.odm.%s_connection.event_manager', 'doctrine'));
+        $container->addCompilerPass(new RegisterEventListenersAndSubscribersPass('doctrine_couchdb.connections', 'doctrine_couchdb.odm.%s_connection.event_manager', 'doctrine_couchdb'));
 
         if ($container->hasExtension('security')) {
             /** @var SecurityExtension $extension */
